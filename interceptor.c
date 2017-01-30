@@ -368,24 +368,14 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	}
 
 			table[syscall].intercepted = 1;
-			// if(pid == 0) {
-			// 	table[syscall].monitored = 1;
-			// } else {
-			// 	table[syscall].monitored = 2;
-			// 	// if (add_pid_sysc(pid, syscall) != 0){
-			// 	// 	return -ENOMEM;
-			// 	// }
-			// }
-
 			table[syscall].f = sys_call_table[syscall];
 		
 			spin_lock(&calltable_lock);
 			set_addr_rw((unsigned long)sys_call_table);
-			sys_call_table[syscall] = &interceptor;
-			set_addr_ro((unsigned long)sys_call_table);
+	    	sys_call_table[syscall] = &interceptor;
+	    	set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
 			return 0;
-
 	 	} 
 
 	 	
