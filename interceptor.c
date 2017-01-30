@@ -357,18 +357,15 @@ asmlinkage long interceptor(struct pt_regs reg) {
     }
     else{
 	 	if(cmd == REQUEST_SYSCALL_INTERCEPT) {
-	 		if(check_valid_syscall(syscall) != 0){
-	 			return -EINVAL;
-	 		}
 
-	 		if(check_root() != 0){
+	 		if(current_uid() != 0){
 				return -EPERM;
-	 		}
+			}
 
 	 		// syscall already being intercepted.
-			if(table[syscall].intercepted == 1){
-				return -EBUSY;
-			}
+			if (table[syscall].intercepted == 1){
+	    		return -EBUSY;
+	    	}
 
 			table[syscall].intercepted = 1;
 			// if(pid == 0) {
