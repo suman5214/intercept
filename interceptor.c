@@ -369,7 +369,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
 			table[syscall].intercepted = 1;
 			table[syscall].f = sys_call_table[syscall];
-		
+			
 			spin_lock(&calltable_lock);
 			set_addr_rw((unsigned long)sys_call_table);
 	    	sys_call_table[syscall] = &interceptor;
@@ -380,30 +380,21 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
 	 	
 	 	else if (cmd == REQUEST_SYSCALL_RELEASE){
-	 		if(check_valid_syscall(syscall) != 0){
-	 			return -EINVAL;
-	 		}
-	 		if(check_root() != 0){
-	 			return -EPERM;
-	 		}
 
-			//syscall not being intercepted.
+	 		if(current_uid() != 0){
+				return -EPERM;
+			}
 			if(table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
-
-			// remove all pids for the syscall
-			destroy_list(syscall);	
-
+				
 			spin_lock(&calltable_lock);
 			set_addr_rw((unsigned long)sys_call_table);
 			sys_call_table[syscall] = table[syscall].f;
 			set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
-
-
+			destroy_list(syscall);
 			table[syscall].intercepted = 0;
-			table[syscall].monitored = 0; 
 			return 0;
 
 	 		}
