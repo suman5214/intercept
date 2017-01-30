@@ -417,11 +417,11 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 	   		// actual code
 	   		if (pid == 0)
 	   		{
-	   			table[syscall].monitored == 2;
+	   			table[syscall].monitored = 2;
 	   		}
 	   		else 
 	   		{
-	   			table[syscall].monitored == 1;
+	   			table[syscall].monitored = 1;
 		   		spin_lock(&pidlist_lock);
 		   		return_status = add_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
@@ -459,6 +459,10 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 	   			spin_lock(&pidlist_lock);
 		   		return_status = del_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
+
+		   		if(table[syscall].listcount == 0){
+		   			table[syscall].monitored = 0;
+		   		}
 	   		}
 	   		return return_status;
 	    }
