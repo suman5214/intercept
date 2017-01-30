@@ -286,7 +286,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
     else if (check_pid_monitored(sysc,current->pid)){
         log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
     }
-    table[sysc].(*f)(reg);
+    table[sysc].f(reg);
 
 
 
