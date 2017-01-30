@@ -422,41 +422,27 @@ long (*orig_custom_syscall)(void);
  * - Ensure synchronization as needed.
  */
 static int init_function(void) {
+	orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];
+	orig_exit_group = sys_call_table[__NR_exit_group];
+	spin_lock_init(&calltable_lock);
+	spin_lock_init(&pidlist_lock);
 
-    //printk(KERN_DEBUG "HEllooooooo\n");
-    
-    spin_lock_init(&pidlist_lock);
-    
-    spin_lock_init(&calltable_lock);
-    
-    spin_lock(&calltable_lock);
+	
+	spin_lock(&calltable_lock);
+	set_addr_rw((unsigned long)sys_call_table);
+	sys_call_table[MY_CUSTOM_SYSCALL] = &my_syscall;
+	sys_call_table[__NR_exit_group] = &my_exit_group;
+	set_addr_ro((unsigned long)sys_call_table);
+	spin_unlock(&calltable_lock);
 
-    orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];
-    
-    orig_exit_group = sys_call_table[__NR_exit_group];
-    
-    set_addr_rw((unsigned long)&sys_call_table);
-    
-    sys_call_table[MY_CUSTOM_SYSCALL] = my_syscall;
-    
-    sys_call_table[__NR_exit_group] = my_exit_group;
-
-    set_addr_ro((unsigned long)&sys_call_table);
-    
-    spin_unlock(&calltable_lock);
-
-    int i = 0;
-    
-    for(i = 0; i < NR_syscalls; i++) {
-    
-        INIT_LIST_HEAD(&(table[i].my_list));
-        
-        table[i].intercepted = 0;
-        
-        table[i].monitored = 0;
-        
-        table[i].listcount = 0;
-    }
+	
+	int i = 0;
+	for(i = 0; i < NR_syscalls; i++){
+		INIT_LIST_HEAD(&(table[i].my_list));
+		table[i].intercepted = 0;
+		table[i].monitored = 0;
+		table[i].listcount = 0;
+	}
 
 	return 0;
 }
@@ -471,25 +457,21 @@ static int init_function(void) {
  *   then set it back to read only once done.
  * - Ensure synchronization, if needed.
  */
-static void exit_function(void)
-{        
+static void exit_function(void){
 
-    spin_lock(&calltable_lock);
-    
-    set_addr_rw((unsigned long)&sys_call_table);
-    
-    sys_call_table[MY_CUSTOM_SYSCALL] = orig_custom_syscall;
-    
-    sys_call_table[__NR_exit_group] = orig_exit_group;
-    
-    set_addr_ro((unsigned long)&sys_call_table);
-    
-    spin_unlock(&calltable_lock);
+	int i = 0;
+	for(i = 0; i < NR_syscalls; i++){
+		destroy_list(i);
+	}
 
-    //printk(KERN_DEBUG "bye\n");
+	spin_lock(&calltable_lock);
+	set_addr_rw((unsigned long)sys_call_table);
 
+	sys_call_table[MY_CUSTOM_SYSCALL] = orig_custom_syscall;
+	sys_call_table[__NR_exit_group] = orig_exit_group;
 
-
+	set_addr_ro((unsigned long)sys_call_table);
+	spin_unlock(&calltable_lock);
 }
 
 module_init(init_function);
