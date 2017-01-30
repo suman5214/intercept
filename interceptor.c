@@ -285,7 +285,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
     int sysc=reg.ax;
     
-    if(table[sysc].intercept) {
+    if(table[sysc].intercepted) {
 	    if (table[sysc].monitored == 2){
 	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
