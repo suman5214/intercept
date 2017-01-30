@@ -377,7 +377,10 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	sys_call_table[syscall] = &interceptor;
 	    	set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
+			printk(KERN_DEBUG "add called \n");
+
 			return 0;
+
 	 	} 
 
 	 	
@@ -397,6 +400,8 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			spin_unlock(&calltable_lock);
 			destroy_list(syscall);
 			table[syscall].intercepted = 0;
+			printk(KERN_DEBUG "release called \n");
+
 			return 0;
 
 	 		}
