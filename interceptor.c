@@ -365,11 +365,11 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 	    	table[syscall].intercepted = 1;
 	    	table[syscall].f = sys_call_table[syscall];
 	    	
-	    	spin_unlock(sys_call_table);
+	    	spin_unlock(&calltable_lock);
 	    	set_addr_rw((unsigned long)sys_call_table);
 	    	sys_call_table[syscall] = &interceptor;
 	    	set_addr_ro((unsigned long)sys_call_table);
-	    	spin_lock(sys_call_table);
+	    	spin_lock(&calltable_lock);
 	    	return 0;
 	    }
 
@@ -382,14 +382,14 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 	    		return -EINVAL;
 	    	}
 
-	    	spin_unlock(sys_call_table);
+	    	spin_unlock(&calltable_lock);
 	    	set_addr_rw((unsigned long)sys_call_table);
 	    	sys_call_table[syscall] = table[syscall].f;
 	    	set_addr_ro((unsigned long)sys_call_table);
-	    	spin_lock(sys_call_table);
+	    	spin_lock(&calltable_lock);
 	    	
 	    	table[syscall].intercepted = 0;
-	    	destroy_list(syscall)
+	    	destroy_list(syscall);
 	    	return 0;
 
 	    }
