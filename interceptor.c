@@ -285,29 +285,18 @@ void my_exit_group(int status)
  */
 
 asmlinkage long interceptor(struct pt_regs reg) {
-	int syscall = reg.ax;
 
-	if(table[syscall].intercepted == 1){
-		printk(KERN_DEBUG "");
-		if(table[syscall].monitored == 0){
-			// pid not monitored.
-			log_message(current->pid, syscall, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
-		} else if(table[syscall].monitored == 1) {
-			// some pids are monitored. need to check for current.
-			if(check_pid_monitored(syscall, current->pid) == 1) {
-				// pid is monitored.
-				log_message(current->pid, syscall, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
-			} else {
-				// pid not monitored.
-			}
-		} else {
-			// pid is monitored
-		}
-	} else {
-		// This syscall is not monitored.
-		
+    int sysc=reg.ax;
+    
+    if(table[sysc].intercept) {
+	    if (table[sysc].monitored == 2){
+	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	    }
+	    else if (check_pid_monitored(sysc,current->pid)){
+	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	    }	
 	}
-	return table[syscall].f(reg);
+    return table[sysc].f(reg);
 }
 
 /**
