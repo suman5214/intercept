@@ -422,6 +422,7 @@ long (*orig_custom_syscall)(void);
  * - Ensure synchronization as needed.
  */
 static int init_function(void) {
+	int i = 0;
 	orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];
 	orig_exit_group = sys_call_table[__NR_exit_group];
 	spin_lock_init(&calltable_lock);
@@ -436,7 +437,7 @@ static int init_function(void) {
 	spin_unlock(&calltable_lock);
 
 	
-	int i = 0;
+
 	for(i = 0; i < NR_syscalls; i++){
 		INIT_LIST_HEAD(&(table[i].my_list));
 		table[i].intercepted = 0;
