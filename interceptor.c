@@ -352,70 +352,75 @@ asmlinkage long interceptor(struct pt_regs reg) {
  */
 
  asmlinkage long my_syscall(int cmd, int syscall, int pid) {
- 	if(cmd == REQUEST_SYSCALL_INTERCEPT) {
- 		if(check_valid_syscall(syscall) != 0){
- 			return -EINVAL;
- 		}
+ 	if (syscall < 0 || syscall > NR_syscalls || syscall == MY_CUSTOM_SYSCALL){
+    		return -EINVAL;
+    }
+    else{
+	 	if(cmd == REQUEST_SYSCALL_INTERCEPT) {
+	 		if(check_valid_syscall(syscall) != 0){
+	 			return -EINVAL;
+	 		}
 
- 		if(check_root() != 0){
-			return -EPERM;
- 		}
+	 		if(check_root() != 0){
+				return -EPERM;
+	 		}
 
- 		// syscall already being intercepted.
-		if(table[syscall].intercepted == 1){
-			return -EBUSY;
-		}
+	 		// syscall already being intercepted.
+			if(table[syscall].intercepted == 1){
+				return -EBUSY;
+			}
 
-		table[syscall].intercepted = 1;
-		// if(pid == 0) {
-		// 	table[syscall].monitored = 1;
-		// } else {
-		// 	table[syscall].monitored = 2;
-		// 	// if (add_pid_sysc(pid, syscall) != 0){
-		// 	// 	return -ENOMEM;
-		// 	// }
-		// }
+			table[syscall].intercepted = 1;
+			// if(pid == 0) {
+			// 	table[syscall].monitored = 1;
+			// } else {
+			// 	table[syscall].monitored = 2;
+			// 	// if (add_pid_sysc(pid, syscall) != 0){
+			// 	// 	return -ENOMEM;
+			// 	// }
+			// }
 
-		table[syscall].f = sys_call_table[syscall];
-	
-		spin_lock(&calltable_lock);
-		set_addr_rw((unsigned long)sys_call_table);
-		sys_call_table[syscall] = &interceptor;
-		set_addr_ro((unsigned long)sys_call_table);
-		spin_unlock(&calltable_lock);
-		return 0;
+			table[syscall].f = sys_call_table[syscall];
+		
+			spin_lock(&calltable_lock);
+			set_addr_rw((unsigned long)sys_call_table);
+			sys_call_table[syscall] = &interceptor;
+			set_addr_ro((unsigned long)sys_call_table);
+			spin_unlock(&calltable_lock);
+			return 0;
 
- 	} 
+	 	} 
 
- 	
- 	else if (cmd == REQUEST_SYSCALL_RELEASE){
- 		if(check_valid_syscall(syscall) != 0){
- 			return -EINVAL;
- 		}
- 		if(check_root() != 0){
- 			return -EPERM;
- 		}
+	 	
+	 	else if (cmd == REQUEST_SYSCALL_RELEASE){
+	 		if(check_valid_syscall(syscall) != 0){
+	 			return -EINVAL;
+	 		}
+	 		if(check_root() != 0){
+	 			return -EPERM;
+	 		}
 
-		//syscall not being intercepted.
-		if(table[syscall].intercepted == 0){
-			return -EINVAL;
-		}
+			//syscall not being intercepted.
+			if(table[syscall].intercepted == 0){
+				return -EINVAL;
+			}
 
-		// remove all pids for the syscall
-		destroy_list(syscall);	
+			// remove all pids for the syscall
+			destroy_list(syscall);	
 
-		spin_lock(&calltable_lock);
-		set_addr_rw((unsigned long)sys_call_table);
-		sys_call_table[syscall] = table[syscall].f;
-		set_addr_ro((unsigned long)sys_call_table);
-		spin_unlock(&calltable_lock);
+			spin_lock(&calltable_lock);
+			set_addr_rw((unsigned long)sys_call_table);
+			sys_call_table[syscall] = table[syscall].f;
+			set_addr_ro((unsigned long)sys_call_table);
+			spin_unlock(&calltable_lock);
 
 
-		table[syscall].intercepted = 0;
-		table[syscall].monitored = 0; 
-		return 0;
+			table[syscall].intercepted = 0;
+			table[syscall].monitored = 0; 
+			return 0;
 
- 	} 
+	 		}
+	 	} 
 
  	return -EINVAL;
 
