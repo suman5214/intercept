@@ -394,79 +394,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 	    }
 
-	    else if (cmd == REQUEST_START_MONITORING)
-	    {	
-	    	int return_status = 0;
-	    	// check error conditions
-	    	if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
-	    		return -EINVAL;
-	    	}
-
-	    	if (current_uid() !=0){
-	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
-	    			return -EPERM;
-	    		}
-	    	}
-	    	if(check_pid_monitored(syscall,pid) == 1){
-	    		return -EBUSY;
-	   		}
-	   		if(table[syscall].intercepted == 0){
-				return -EINVAL;
-			}
-
-	   		// actual code
-	   		if (pid == 0)
-	   		{
-	   			table[syscall].monitored = 2;
-	   		}
-	   		else 
-	   		{
-	   			table[syscall].monitored = 1;
-		   		spin_lock(&pidlist_lock);
-		   		return_status = add_pid_sysc(pid,syscall);
-		   		spin_unlock(&pidlist_lock);
-		   	}
-	   		return return_status;
-
-	    }
-
-	    else if (cmd == REQUEST_STOP_MONITORING){
-	    	int return_status = 0;
-	    	// check error conditions
-	    	if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
-	    		return -EINVAL;
-	    	}
-
-	    	if (current_uid() !=0){
-	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
-	    			return -EPERM;
-	    		}
-	    	}
-	    	if(table[syscall].intercepted == 0){
-				return -EINVAL;
-			}
-
-
-	   		// acutal code
-
-	   		if(pid == 0)
-	   		{
-	   			destroy_list(syscall);
-	   			table[syscall].monitored = 0;
-	   		}
-	   		else
-	   		{
-	   			spin_lock(&pidlist_lock);
-		   		return_status = del_pid_sysc(pid,syscall);
-		   		spin_unlock(&pidlist_lock);
-
-		   		if(table[syscall].listcount == 0){
-		   			table[syscall].monitored = 0;
-		   		}
-	   		}
-	   		return return_status;
-	    }
-
 	    return -EINVAL;
 
 	}
@@ -518,7 +445,7 @@ static int init_function(void) {
     
     spin_unlock(&calltable_lock);
 
-    int i;
+    int i = 0;
     
     for(i = 0; i < NR_syscalls; i++) {
     
