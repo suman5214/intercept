@@ -290,12 +290,10 @@ asmlinkage long interceptor(struct pt_regs reg) {
     
     if(table[sysc].intercepted) {
 	    if (table[sysc].monitored == 2){
-	    	printk(KERN_DEBUG "all called \n");
-	        //log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
 	    else if (check_pid_monitored(sysc,current->pid)){
-	    	printk(KERN_DEBUG "one called \n");
-	        //log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
 	}
     return table[sysc].f(reg);
@@ -377,7 +375,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	sys_call_table[syscall] = &interceptor;
 	    	set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
-			printk(KERN_DEBUG "add called \n");
+			printk(KERN_DEBUG "add called %d\n",table[syscall].intercepted);
 
 			return 0;
 
@@ -400,7 +398,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			spin_unlock(&calltable_lock);
 			destroy_list(syscall);
 			table[syscall].intercepted = 0;
-			printk(KERN_DEBUG "release called \n");
+			printk(KERN_DEBUG "release called %d\n",table[syscall].intercepted);
 
 			return 0;
 
