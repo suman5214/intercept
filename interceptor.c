@@ -286,14 +286,16 @@ void my_exit_group(int status)
 
 asmlinkage long interceptor(struct pt_regs reg) {
 
+	//acquiring the system call number
     int sysc=reg.ax;
     
     if(table[sysc].intercepted) {
+
 	    if (table[sysc].monitored == 2){
-	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, (long unsigned int)reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
 	    else if (check_pid_monitored(sysc,current->pid)){
-	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, (long unsigned int)reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
 	}
     return table[sysc].f(reg);
@@ -352,16 +354,18 @@ asmlinkage long interceptor(struct pt_regs reg) {
  */
 
  asmlinkage long my_syscall(int cmd, int syscall, int pid) {
+ 	//check for valid system call
  	if (syscall < 0 || syscall > NR_syscalls || syscall == MY_CUSTOM_SYSCALL){
     		return -EINVAL;
     }
     else{
 	 	if(cmd == REQUEST_SYSCALL_INTERCEPT) {
 
+	 		//checks for root
 	 		if(current_uid() != 0){
 				return -EPERM;
 			}
-
+			//checks for intercepting a system call that is already intercepted
 			if (table[syscall].intercepted == 1){
 	    		return -EBUSY;
 	    	}
@@ -381,9 +385,11 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	
 	 	else if (cmd == REQUEST_SYSCALL_RELEASE){
 
+	 		//checks for root
 	 		if(current_uid() != 0){
 				return -EPERM;
 			}
+			//de-intercept a system call that has not been intercepted yet
 			if(table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
@@ -401,26 +407,30 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
 	 	else if (cmd == REQUEST_START_MONITORING){
 	 		int return_status = 0;
-
+	 		//checks for right permissions
 	 		if (current_uid() !=0){
 	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
 	    			return -EPERM;
 	    		}
 	    	}
+	    	// cannot start monitoring for system call not being intercepted
 	    	if(table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
+			//checks valid PID
 			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
 	    		return -EINVAL;
 	    	}
-			if(check_pid_monitored(syscall,pid) == 1){
-	    		return -EBUSY;
-	   		}
+	    	
 
 	 		if (pid == 0){
 		   		table[syscall].monitored = 2;
 		   	}
 	   		else{
+	   			// cannot start monitoring PID when already being monitored
+				if(check_pid_monitored(syscall,pid) == 1){
+		    		return -EBUSY;
+		   		}
 	   			table[syscall].monitored = 1;
 		   		spin_lock(&pidlist_lock);
 		   		return_status = add_pid_sysc(pid,syscall);
@@ -432,20 +442,21 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	else if (cmd == REQUEST_STOP_MONITORING){
 	 		int return_status = 0;
 
+	 		//checks for right permissions
 	 		if (current_uid() !=0){
 	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
 	    			return -EPERM;
 	    		}
 	    	}
+	    	// cannot start monitoring for system call not being intercepted
 	    	if(table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
+			//checks valid PID
 			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
 	    		return -EINVAL;
 	    	}
 
-
-	 		
 	 		if(pid == 0)
 	   		{
 	   			spin_lock(&pidlist_lock);
@@ -456,6 +467,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	   		}
 	   		else
 	   		{
+	   			// cannot stop monitoring PID when not being monitored
 	   			if(check_pid_monitored(syscall,pid) == 0){
 	    		return -EINVAL;
 	   			}
@@ -533,6 +545,7 @@ static int init_function(void) {
 static void exit_function(void)
 {        
 	int i;
+
 	spin_lock(&pidlist_lock);
 	for(i = 0; i<NR_syscalls; i++){
 		destroy_list(i);
@@ -545,8 +558,6 @@ static void exit_function(void)
     sys_call_table[__NR_exit_group] = orig_exit_group;   
     set_addr_ro((unsigned long)&sys_call_table);  
     spin_unlock(&calltable_lock);
-
-
 
 }
 
