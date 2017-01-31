@@ -447,6 +447,9 @@ asmlinkage long interceptor(struct pt_regs reg) {
 				return -EINVAL;
 			}
 
+	    	if(check_pid_monitored(syscall,pid) == 0){
+	    		return -EINVAL;
+	   		}
 
 	 		
 	 		if(pid == 0)
