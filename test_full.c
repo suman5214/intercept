@@ -171,7 +171,6 @@ void test_syscall(int syscall) {
 	//clear_log();
 	do_intercept(syscall, 0);
 	do_start(syscall, 0, 0);
-	system("time");
 	do_stop(syscall, 0, 0);
 	do_start(syscall, 1, 0);
 	do_stop(syscall, 1, 0);
@@ -180,7 +179,7 @@ void test_syscall(int syscall) {
 
 
 int main(int argc, char **argv) {
-
+	clear_log();
 	srand(time(NULL));
 
 	if (argc>1 && strcmp(argv[1], "intercept") == 0) 
