@@ -405,6 +405,12 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	}
 
 	 	else if (cmd == REQUEST_START_MONITORING){
+	 		if (current_uid() !=0){
+	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
+	    			return -EPERM;
+	    		}
+	    	}
+
 	 		int return_status = 0;
 	 		if (pid == 0){
 		   		table[syscall].monitored = 2;
@@ -420,6 +426,12 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	}
 
 	 	else if (cmd == REQUEST_STOP_MONITORING){
+	 		if (current_uid() !=0){
+	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
+	    			return -EPERM;
+	    		}
+	    	}
+	    	
 	 		int return_status = 0;
 	 		if(pid == 0)
 	   		{
