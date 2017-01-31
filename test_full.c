@@ -183,19 +183,9 @@ void test_syscall(int syscall) {
 	do_release(syscall, 0);
 }
 
-void test_syscall2(int syscall) {
-
-	//clear_log();
-	do_intercept(syscall, 0);
-	do_start(syscall, 0, 0);
-	do_stop(syscall, 1, 0);
-	do_stop(syscall, 1, 0);
-	do_release(syscall, 0);
-}
-
 
 int main(int argc, char **argv) {
-
+	clear_log();
 	srand(time(NULL));
 
 	if (argc>1 && strcmp(argv[1], "intercept") == 0) 
@@ -225,15 +215,13 @@ int main(int argc, char **argv) {
 	do_intercept(__NR_exit, 0);
 	do_release(__NR_exit, 0);
 
-
+	test_syscall(SYS_open);
 	/* The above line of code tests SYS_open.
 	   Feel free to add more tests here for other system calls, 
 	   once you get everything to work; check Linux documentation
 	   for other syscall number definitions.  */
 
 	test("rmmod interceptor.ko %s", "", system("rmmod interceptor") == 0);
-
-	test_syscall2(SYS_open);
 	return 0;
 }
 
