@@ -429,10 +429,11 @@ asmlinkage long interceptor(struct pt_regs reg) {
 		   	}
 
 	 		if (pid == 0){
-		   		table[syscall].monitored = 2;
+		   		
 		   		spin_lock(&pidlist_lock);
 		   		destroy_list(syscall);
 		   		spin_unlock(&pidlist_lock);
+		   		table[syscall].monitored = 2;
 		   	}
 	   		else{
 	   			table[syscall].monitored = 1;
