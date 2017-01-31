@@ -378,7 +378,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	sys_call_table[syscall] = &interceptor;
 	    	set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
-			printk(KERN_DEBUG "intercept table intercepted:%d monitored:%d  length:%d\n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount);
+			printk(KERN_DEBUG "intercept table intercepted:%d monitored:%d  length:%d syscall:%d \n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount,syscall);
 			return 0;
 
 	 	} 
