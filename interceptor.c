@@ -446,12 +446,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	if(table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
-			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
-	    		return -EINVAL;
-	    	}
-	    	if(check_pid_monitored(syscall,pid) == 0){
-	    		return -EINVAL;
-	   		}
+
 
 	 		
 	 		if(pid == 0)
