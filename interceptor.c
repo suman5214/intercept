@@ -291,12 +291,11 @@ asmlinkage long interceptor(struct pt_regs reg) {
     
     if(table[sysc].intercepted) {
 
-    	long unsigned int cx = reg.cx;
-	    if (table[sysc].monitored == 2){
-	        log_message(current->pid, sysc, reg.bx, cx, reg.dx, reg.si, reg.di, reg.bp);
+	    if (table[sysc].monitored == 2 && !(check_pid_monitored(sysc,current->pid))){
+	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
 	    else if (check_pid_monitored(sysc,current->pid)){
-	        log_message(current->pid, sysc, reg.bx, cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
 	}
     return table[sysc].f(reg);
@@ -422,16 +421,18 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
 	    		return -EINVAL;
 	    	}
-	    	
+	    	// cannot start monitoring PID when already being monitored
+			if(table[syscall].monitored == 2 || check_pid_monitored(syscall,pid) == 1){
+		    	return -EBUSY;
+		   	}
 
 	 		if (pid == 0){
 		   		table[syscall].monitored = 2;
+		   		spin_lock(&pidlist_lock);
+		   		destroy_list(syscall);
+		   		spin_unlock(&pidlist_lock);
 		   	}
 	   		else{
-	   			// cannot start monitoring PID when already being monitored
-				if(check_pid_monitored(syscall,pid) == 1){
-		    		return -EBUSY;
-		   		}
 	   			table[syscall].monitored = 1;
 		   		spin_lock(&pidlist_lock);
 		   		return_status = add_pid_sysc(pid,syscall);
@@ -457,21 +458,26 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
 	    		return -EINVAL;
 	    	}
+	    	// cannot stop monitoring PID when not being monitored
+	   		if(pid !=0 && check_pid_monitored(syscall,pid) == 0){
+	    		return -EINVAL;
+	   		}
 
 	 		if(pid == 0)
 	   		{
 	   			spin_lock(&pidlist_lock);
 	   			destroy_list(syscall);
 	   			spin_unlock(&pidlist_lock);
-
 	   			table[syscall].monitored = 0;
 	   		}
 	   		else
 	   		{
-	   			// cannot stop monitoring PID when not being monitored
-	   			if(check_pid_monitored(syscall,pid) == 0){
-	    		return -EINVAL;
+	   			if(table[syscall].monitored == 2){
+	   				spin_lock(&pidlist_lock);
+	   				add_pid_sysc(pid,syscall);
+	   				spin_unlock(&pidlist_lock);
 	   			}
+
 	   			spin_lock(&pidlist_lock);
 		   		return_status = del_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
