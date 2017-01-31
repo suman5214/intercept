@@ -221,7 +221,8 @@ int main(int argc, char **argv) {
 	   Feel free to add more tests here for other system calls, 
 	   once you get everything to work; check Linux documentation
 	   for other syscall number definitions.  */
-
+	do_intercept(__NR_time, 0);
+	do_start(__NR_time, 0, 0);
 	test("rmmod interceptor.ko %s", "", system("rmmod interceptor") == 0);
 	return 0;
 }
