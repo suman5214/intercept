@@ -378,6 +378,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	sys_call_table[syscall] = &interceptor;
 	    	set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
+			printk(KERN_DEBUG "intercept table intercepted:%d monitored:%d  length:%d\n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount);
 			return 0;
 
 	 	} 
@@ -401,6 +402,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			spin_unlock(&calltable_lock);
 			destroy_list(syscall);
 			table[syscall].intercepted = 0;
+			printk(KERN_DEBUG "release table intercepted:%d monitored:%d  length:%d\n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount);
 			return 0;
 
 	 	}
@@ -438,6 +440,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 		   		return_status = add_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
 		   	}
+		   	printk(KERN_DEBUG "start table intercepted:%d monitored:%d  length:%d\n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount);
 	   		return return_status;
 	 	}
 
@@ -482,6 +485,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 		   		return_status = del_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
 	   		}
+	   		printk(KERN_DEBUG "STOP table intercepted:%d monitored:%d  length:%d\n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount);
 	   		return return_status;
 	 	}
 	 } 

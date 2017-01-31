@@ -183,6 +183,16 @@ void test_syscall(int syscall) {
 	do_release(syscall, 0);
 }
 
+void test_syscall2(int syscall) {
+
+	//clear_log();
+	do_intercept(syscall, 0);
+	do_start(syscall, 0, 0);
+	do_stop(syscall, 1, 0);
+	do_stop(syscall, 1, 0);
+	do_release(syscall, 0);
+}
+
 
 int main(int argc, char **argv) {
 
@@ -216,6 +226,7 @@ int main(int argc, char **argv) {
 	do_release(__NR_exit, 0);
 
 	test_syscall(SYS_open);
+	test_syscall2(SYS_open);
 	/* The above line of code tests SYS_open.
 	   Feel free to add more tests here for other system calls, 
 	   once you get everything to work; check Linux documentation
