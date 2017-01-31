@@ -170,21 +170,22 @@ void test_syscall(int syscall) {
 
 	//clear_log();
 	do_intercept(syscall, 0);
+	do_intercept(syscall, -EBUSY);
+	do_as_guest("./test_full nonroot %d", syscall, 0);
+	do_start(syscall, -2, -EINVAL);
 	do_start(syscall, 0, 0);
 	do_stop(syscall, 0, 0);
-	
 	do_start(syscall, 1, 0);
-	do_start(syscall, 2, 0);
-	do_stop(syscall, 2, 0);
-	do_stop(syscall, 0, 0);
-	do_start(syscall, 1, 0);
-	do_start(syscall, 2, 0);
+	do_as_guest("./test_full stop %d 1 %d", syscall, -EPERM);
+	do_stop(syscall, 1, 0);
+	do_as_guest("./test_full start %d -1 %d", syscall, 0);
+	do_stop(syscall, last_child, -EINVAL);
 	do_release(syscall, 0);
 }
 
 
 int main(int argc, char **argv) {
-	clear_log();
+
 	srand(time(NULL));
 
 	if (argc>1 && strcmp(argv[1], "intercept") == 0) 
