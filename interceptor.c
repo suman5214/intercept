@@ -405,13 +405,23 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	}
 
 	 	else if (cmd == REQUEST_START_MONITORING){
+	 		int return_status = 0;
+
 	 		if (current_uid() !=0){
 	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
 	    			return -EPERM;
 	    		}
 	    	}
+	    	if(table[syscall].intercepted == 0){
+				return -EINVAL;
+			}
+			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
+	    		return -EINVAL;
+	    	}
+			if(check_pid_monitored(syscall,pid) == 1){
+	    		return -EBUSY;
+	   		}
 
-	 		int return_status = 0;
 	 		if (pid == 0){
 		   		table[syscall].monitored = 2;
 		   	}
@@ -426,13 +436,24 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	}
 
 	 	else if (cmd == REQUEST_STOP_MONITORING){
+	 		int return_status = 0;
+
 	 		if (current_uid() !=0){
 	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
 	    			return -EPERM;
 	    		}
 	    	}
-	    	
-	 		int return_status = 0;
+	    	if(table[syscall].intercepted == 0){
+				return -EINVAL;
+			}
+			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
+	    		return -EINVAL;
+	    	}
+	    	if(check_pid_monitored(syscall,pid) == 0){
+	    		return -EINVAL;
+	   		}
+
+	 		
 	 		if(pid == 0)
 	   		{
 	   			spin_lock(&pidlist_lock);
