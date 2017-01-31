@@ -292,10 +292,10 @@ asmlinkage long interceptor(struct pt_regs reg) {
     if(table[sysc].intercepted) {
 
 	    if (table[sysc].monitored == 2){
-	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, (unsigned long)reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
 	    else if (check_pid_monitored(sysc,current->pid)){
-	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, sysc, (unsigned long)reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
 	}
     return table[sysc].f(reg);
