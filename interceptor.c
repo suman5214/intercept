@@ -402,8 +402,43 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
 			return 0;
 
-	 		}
-	 	} 
+	 	}
+
+	 	else if (cmd == REQUEST_START_MONITORING){
+	 		int return_status = 0;
+	 		if (pid == 0){
+		   		table[syscall].monitored == 2;
+		   	}
+	   		else{
+	   			table[syscall].monitored == 1;
+		   		spin_lock(&pidlist_lock);
+		   		return_status = add_pid_sysc(pid,syscall);
+		   		spin_unlock(&pidlist_lock);
+		   	}
+		   	printk(KERN_DEBUG "pid added called %d %d\n",table[syscall].monitored,table[syscall].listcount);
+	   		return return_status;
+	 	}
+
+	 	else if (cmd = REQUEST_STOP_MONITORING){
+	 		int return_status = 0;
+	 		if(pid == 0)
+	   		{
+	   			spin_lock(&pidlist_lock);
+	   			destroy_list(syscall);
+	   			spin_unlock(&pidlist_lock);
+
+	   			table[syscall].monitored = 0;
+	   		}
+	   		else
+	   		{
+	   			spin_lock(&pidlist_lock);
+		   		return_status = del_pid_sysc(pid,syscall);
+		   		spin_unlock(&pidlist_lock);
+	   		}
+	   		printk(KERN_DEBUG "pid deleted called %d %d\n",table[syscall].monitored,table[syscall].listcount);
+	   		return return_status;
+	 	}
+	 } 
 
  	return -EINVAL;
 
