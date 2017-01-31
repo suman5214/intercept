@@ -175,6 +175,7 @@ void test_syscall(int syscall) {
 	
 	do_start(syscall, 1, 0);
 	do_stop(syscall, 1, 0);
+	do_start(syscall, 1, 0);
 	do_release(syscall, 0);
 }
 
