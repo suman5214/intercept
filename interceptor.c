@@ -407,10 +407,10 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 	else if (cmd == REQUEST_START_MONITORING){
 	 		int return_status = 0;
 	 		if (pid == 0){
-		   		table[syscall].monitored == 2;
+		   		table[syscall].monitored = 2;
 		   	}
 	   		else{
-	   			table[syscall].monitored == 1;
+	   			table[syscall].monitored = 1;
 		   		spin_lock(&pidlist_lock);
 		   		return_status = add_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
@@ -419,7 +419,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	   		return return_status;
 	 	}
 
-	 	else if (cmd = REQUEST_STOP_MONITORING){
+	 	else if (cmd == REQUEST_STOP_MONITORING){
 	 		int return_status = 0;
 	 		if(pid == 0)
 	   		{
