@@ -298,6 +298,9 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    	printk(KERN_DEBUG "calling 1  \n\n\n");
 	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
+	    else{
+	    	printk(KERN_DEBUG "found none monitor:%d",current->pid);
+	    }
 	}
     return table[sysc].f(reg);
 }
