@@ -416,30 +416,35 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 		//checks for right permissions
 	 		if (current_uid() !=0){
 	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
+	    			printk(KERN_DEBUG "add error 1\n");
 	    			return -EPERM;
 	    		}
 	    	}
 	    	// cannot start monitoring for system call not being intercepted
 	    	if(table[syscall].intercepted == 0){
+	    		printk(KERN_DEBUG "add error 2\n");
 				return -EINVAL;
 			}
 			//checks valid PID
 			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
+				printk(KERN_DEBUG "add error 3\n");
 	    		return -EINVAL;
 	    	}
 	    	// cannot start monitoring PID when already being monitored
 			if(table[syscall].monitored == 2 || check_pid_monitored(syscall,pid) == 1){
+				printk(KERN_DEBUG "add error 4\n");
 		    	return -EBUSY;
 		   	}
 
 	 		if (pid == 0){
-		   		
+		   		printk(KERN_DEBUG "add error 5\n");
 		   		spin_lock(&pidlist_lock);
 		   		destroy_list(syscall);
 		   		spin_unlock(&pidlist_lock);
 		   		table[syscall].monitored = 2;
 		   	}
 	   		else{
+	   			printk(KERN_DEBUG "add error 6\n");
 	   			table[syscall].monitored = 1;
 		   		spin_lock(&pidlist_lock);
 		   		return_status = add_pid_sysc(pid,syscall);
