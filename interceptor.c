@@ -469,7 +469,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    		return -EINVAL;
 	    	}
 	    	// cannot stop monitoring PID when not being monitored
-	   		if(pid !=0 && check_pid_monitored(syscall,pid) == 0){
+	   		if(pid !=0 && check_pid_monitored(syscall,pid) == 0 && table[syscall].monitored !=2){
 	   			printk(KERN_DEBUG "4\n");
 	    		return -EINVAL;
 	   		}
