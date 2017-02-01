@@ -296,7 +296,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	    }
 	    else if (table[sysc].monitored == 1 && check_pid_monitored(sysc,current->pid)){
 	    	printk(KERN_DEBUG "calling 1  \n\n\n");
-	        log_message(current->pid, (unsigned long) sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	        log_message(current->pid, (long unsigned int)sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
 	    else{
 	    	printk(KERN_DEBUG "found none monitor:%d",current->pid);
