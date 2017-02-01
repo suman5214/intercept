@@ -181,6 +181,9 @@ void test_syscall(int syscall) {
 	else{
 		waitpid(pid,&sta,WNOHANG);
 		do_start(syscall, getpid(), 0);
+		do_start(syscall, 1, 0);
+		do_start(syscall, 2, 0);
+		do_start(syscall, 3, 0);
 		do_stop(syscall,0,0);
 		do_start(syscall, 0, 0);
 		do_stop(syscall,getpid(),0);
@@ -222,7 +225,7 @@ int main(int argc, char **argv) {
 	do_intercept(__NR_exit, 0);
 	do_release(__NR_exit, 0);
 
-	test_syscall(SYS_mkdir);
+	test_syscall(SYS_time);
 	/* The above line of code tests SYS_open.
 	   Feel free to add more tests here for other system calls, 
 	   once you get everything to work; check Linux documentation
