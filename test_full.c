@@ -171,11 +171,13 @@ void test_syscall(int syscall) {
 	//clear_log();
 	do_intercept(syscall, 0);
 	do_start(syscall, 0, 0);
+	do_stop(syscall,0,0);
+	do_release(syscall,0,0);
 }
 
 
 int main(int argc, char **argv) {
-
+	clear_log();
 	srand(time(NULL));
 
 	if (argc>1 && strcmp(argv[1], "intercept") == 0) 
@@ -210,8 +212,6 @@ int main(int argc, char **argv) {
 	   Feel free to add more tests here for other system calls, 
 	   once you get everything to work; check Linux documentation
 	   for other syscall number definitions.  */
-	do_intercept(__NR_time, 0);
-	do_start(__NR_time, 0, 0);
 	test("rmmod interceptor.ko %s", "", system("rmmod interceptor") == 0);
 	return 0;
 }

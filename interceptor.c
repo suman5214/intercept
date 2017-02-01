@@ -290,13 +290,16 @@ asmlinkage long interceptor(struct pt_regs reg) {
     int sysc=reg.ax;
     
     if(table[sysc].intercepted) {
-
+    	printk(KERN_DEBUG "calling intercepted  \n\n\n");
 	    if (table[sysc].monitored == 2 && !(check_pid_monitored(sysc,current->pid))){
 	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
 	    else if (check_pid_monitored(sysc,current->pid)){
 	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
+	}
+	else{
+		printk(KERN_DEBUG "Not intercepted yet \n\n\n");
 	}
     return table[sysc].f(reg);
 }
@@ -540,9 +543,6 @@ static int init_function(void) {
         table[i].monitored = 0;        
         table[i].listcount = 0;
     }
-
-    my_syscall(REQUEST_SYSCALL_INTERCEPT,13,0);
-    my_syscall(REQUEST_START_MONITORING,13,875);
 
 	return 0;
 }
