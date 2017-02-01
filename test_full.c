@@ -184,6 +184,7 @@ void test_syscall(int syscall) {
 		do_start(syscall, 1, 0);
 		do_start(syscall, 2, 0);
 		do_start(syscall, 3, 0);
+		do_monitor(syscall);
 		do_release(syscall,0);
 	}
 	
@@ -221,7 +222,7 @@ int main(int argc, char **argv) {
 	do_intercept(__NR_exit, 0);
 	do_release(__NR_exit, 0);
 
-	test_syscall(SYS_time);
+	test_syscall(SYS_open);
 	/* The above line of code tests SYS_open.
 	   Feel free to add more tests here for other system calls, 
 	   once you get everything to work; check Linux documentation
