@@ -170,6 +170,7 @@ void test_syscall(int syscall) {
 
 	//clear_log();
 	int pid;
+	int *sta;
 	do_intercept(syscall, 0);
 	
 	pid = fork();
@@ -178,6 +179,7 @@ void test_syscall(int syscall) {
 		do_start(syscall, getpid(), 0);
 	}
 	else{
+		waitpid(pid,sta);
 		do_start(syscall, getpid(), 0);
 		do_monitor(syscall);
 		do_stop(syscall,getpid(),0);
