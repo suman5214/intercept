@@ -292,9 +292,11 @@ asmlinkage long interceptor(struct pt_regs reg) {
     if(table[sysc].intercepted) {
     	printk(KERN_DEBUG "calling intercepted  \n\n\n");
 	    if (table[sysc].monitored == 2 && !(check_pid_monitored(sysc,current->pid))){
+	    	printk(KERN_DEBUG "calling 1  \n\n\n");
 	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }
 	    else if (check_pid_monitored(sysc,current->pid)){
+	    	printk(KERN_DEBUG "calling 2  \n\n\n");
 	        log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	    }	
 	}
