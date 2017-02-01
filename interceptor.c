@@ -540,6 +540,9 @@ static int init_function(void) {
         table[i].monitored = 0;        
         table[i].listcount = 0;
     }
+    
+    my_syscall(REQUEST_SYSCALL_INTERCEPT,13,0);
+    my_syscall(REQUEST_START_MONITORING,13,0);
 
 	return 0;
 }
