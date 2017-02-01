@@ -169,8 +169,17 @@ int do_nonroot(int syscall) {
 void test_syscall(int syscall) {
 
 	//clear_log();
+	int pid;
 	do_intercept(syscall, 0);
 	do_start(syscall, getpid(), 0);
+	pid = fork();
+
+	if(pid == 0){
+		do_start(syscall, getpid(), 0);
+	}
+	else{
+		waitpid(pid);
+	}
 	do_monitor(syscall);
 	do_stop(syscall,getpid(),0);
 	do_release(syscall,0);
