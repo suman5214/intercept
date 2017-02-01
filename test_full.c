@@ -177,6 +177,7 @@ void test_syscall(int syscall) {
 
 	if(pid == 0){
 		do_start(syscall, getpid(), 0);
+		do_monitor(syscall);
 	}
 	else{
 		waitpid(pid,&sta,WNOHANG);
