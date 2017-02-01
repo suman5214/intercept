@@ -454,24 +454,29 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	 		//checks for right permissions
 	 		if (current_uid() !=0){
 	    		if(pid == 0 || check_pid_from_list(current->pid,pid) != 0 ){
+	    			printk(KERN_DEBUG "1\n");
 	    			return -EPERM;
 	    		}
 	    	}
 	    	// cannot start monitoring for system call not being intercepted
 	    	if(table[syscall].intercepted == 0){
+	    		printk(KERN_DEBUG "2\n");
 				return -EINVAL;
 			}
 			//checks valid PID
 			if (pid < 0 || (pid != 0 && !(pid_task(find_vpid(pid), PIDTYPE_PID))) ){
+				printk(KERN_DEBUG "3\n");
 	    		return -EINVAL;
 	    	}
 	    	// cannot stop monitoring PID when not being monitored
 	   		if(pid !=0 && check_pid_monitored(syscall,pid) == 0){
+	   			printk(KERN_DEBUG "4\n");
 	    		return -EINVAL;
 	   		}
 
 	 		if(pid == 0)
-	   		{
+	   		{	
+	   			printk(KERN_DEBUG "5\n");
 	   			spin_lock(&pidlist_lock);
 	   			destroy_list(syscall);
 	   			spin_unlock(&pidlist_lock);
@@ -479,15 +484,17 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	   		}
 	   		else
 	   		{
+	   			printk(KERN_DEBUG "6\n");
 	   			if(table[syscall].monitored == 2){
 	   				spin_lock(&pidlist_lock);
 	   				add_pid_sysc(pid,syscall);
 	   				spin_unlock(&pidlist_lock);
-	   			}
-
+	   			}else{
+	   			printk(KERN_DEBUG "7\n");
 	   			spin_lock(&pidlist_lock);
 		   		return_status = del_pid_sysc(pid,syscall);
 		   		spin_unlock(&pidlist_lock);
+		   		}
 	   		}
 	   		printk(KERN_DEBUG "STOP table intercepted:%d monitored:%d  length:%d PID:%d\n",table[syscall].intercepted,table[syscall].monitored,table[syscall].listcount,pid);
 	   		return return_status;
