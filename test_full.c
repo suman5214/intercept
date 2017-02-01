@@ -99,7 +99,7 @@ int do_monitor(int sysno) {
 	//	args[0], args[1], args[2], args[3], args[4], args[5]);
 
 	test("%d nonroot monitor", sysno, find_log(getpid(), (long)sno, args, (long)ret) == 0);
-	printf(getpid());
+	printf("%d\n\n",getpid());
 	return 0;
 }
 
