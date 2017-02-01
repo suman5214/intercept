@@ -171,6 +171,7 @@ void test_syscall(int syscall) {
 	//clear_log();
 	do_intercept(syscall, 0);
 	do_start(syscall, getpid(), 0);
+	do_monitor(syscall);
 	do_stop(syscall,getpid(),0);
 	do_release(syscall,0);
 }
