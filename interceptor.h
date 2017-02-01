@@ -13,7 +13,7 @@
 asmlinkage long my_syscall(int cmd, int syscall, int pid);
 
 #define log_message(pid, syscall, arg1, arg2, arg3, arg4, arg5, arg6) \
-	printk(KERN_DEBUG "[%d]%lx(%lx,%lx,%lx,%lx,%lx,%lx)\n", pid, \
+	printk(KERN_DEBUG "[%x]%lx(%lx,%lx,%lx,%lx,%lx,%lx)\n", pid, \
 		syscall, \
 		arg1, arg2, arg3, arg4, arg5, arg6 \
 	);
