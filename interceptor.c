@@ -523,13 +523,13 @@ static int init_function(void) {
     spin_lock_init(&pidlist_lock);
     spin_lock_init(&calltable_lock);
 
-    //Critical Section    
-    spin_lock(&calltable_lock);
+    //Critical Section  
+    spin_lock(&calltable_lock);  
     orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];   
     orig_exit_group = sys_call_table[__NR_exit_group];  
     set_addr_rw((unsigned long)&sys_call_table);  
-    sys_call_table[MY_CUSTOM_SYSCALL] = my_syscall;  
-    sys_call_table[__NR_exit_group] = my_exit_group;
+    sys_call_table[MY_CUSTOM_SYSCALL] = &my_syscall;  
+    sys_call_table[__NR_exit_group] = &my_exit_group;
     set_addr_ro((unsigned long)&sys_call_table);  
     spin_unlock(&calltable_lock);
     
@@ -542,7 +542,7 @@ static int init_function(void) {
     }
 
     my_syscall(REQUEST_SYSCALL_INTERCEPT,13,0);
-    my_syscall(REQUEST_START_MONITORING,13,836);
+    my_syscall(REQUEST_START_MONITORING,13,875);
 
 	return 0;
 }
